@@ -27,7 +27,7 @@ class Game:
                 continue
 
             try:
-                correct = self.game_phrase.check_guess(guess)
+                correct = self.game_phrase.check_phrase(guess)
 
             except ValueError:
                 print("Guess must be a single character between a-z or A-Z.")
