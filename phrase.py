@@ -1,23 +1,42 @@
-from .character import Character
-
-
 class Phrase:
-
     def __init__(self, phrase):
-        try:
-            self.phrase = [Character(c) for c in phrase]
-        except Exception:
-            print("Oh no! We're experiencing an error. Please try again. Enter an alphabet character, i.e. a-z, A-Z")
-            exit(1)
+        self.phrase = phrase.lower()
 
 
-    def show_phrase(self):
-        return ' '.join([c.show() for c in self.phrase])
+    def __iter__(self):
+        yield from self.phrase
 
 
-    def check_phrase(self, guess):
-        correct = False
-        for c in self.phrase:
-            if c.check_phrase(guess):
-                correct = True
-        return correct
+    def __eq__(self, other):
+        if self == other:
+            return True
+
+
+    def display(self, guesses):
+        for letter in self.phrase:
+            if letter in guesses:
+                print("{}".format(letter), end=" ")
+            elif letter == " ":
+                print(" ", end=" ")
+            else:
+                print("_", end=" ")
+        print("\n")
+
+
+    def check_letter(self, guess):
+        if guess in self.phrase:
+            return True
+        else:
+            return False
+            print("You, chose poorly... Please try again.")
+            
+            
+    def check_complete(self, guesses):
+        guessed = set(guesses)
+        required = set()
+        for letter in self.phrase:
+            required.add(letter)
+        required.remove(' ')
+        if not len(required - guessed):
+            return True
+        return False
