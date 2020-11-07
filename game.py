@@ -1,66 +1,78 @@
+from phrase import Phrase
 import random
-
-from .phrase import Phrase
 
 
 class Game:
-    guess_limit = 5
+    def create_phrases(self):
+        phrases = [Phrase("Misfit Love"), Phrase("Battery Acid"), Phrase("God is in the Radio"), Phrase("Go With the Flow"), Phrase("Make it wit Chu")]
+        return phrases
 
-    def __init__(self, phrases):
-        self.phrases = phrases
-        self.game_phrase = Phrase(random.choice(self.phrases))
 
-    def new_game(self):
-        self.game_phrase = Phrase(random.choice(self.phrases))
+    def get_random_phrase(self):
+        return random.choice(self.phrases)
 
-    def start_game(self):
-        guesses = []
-        incorrect = []
 
+    def __init__(self):
+        self.missed = 0
+        self.phrases = self.create_phrases()
+        self.active_phrase = self.get_random_phrase()
+        self.guesses = []
+
+
+    def welcome(self):
+        print(" "*9+"_"*47+"""\n
+        === GET READY TO PLAY PH-PH-PH-PHRASE HUNTER ===
+        """+"_"*48, "\nGET READY TO CHOOSE YOUR LETTER AT THE PROMPT. YOU HAVE 5 GUESSES. LET'S GO !!!\n")
+
+
+    def get_guess(self):
         while True:
-            phrase = self.game_phrase.show_phrase()
-            print(phrase)
-            guess = input("Guess a letter to solve the phrase! ")
+            user_guess = (input("Choose your letter: ")).lower()
+            if not user_guess.isalpha():
+                print("You may only choose alphabet characters, i.e. a-z, A-Z. Please try again.")
+            elif len(user_guess) != 1:
+                print("Sorry! You're only allowed one choice at a time. Please select a letter.")
+            else:
+                return user_guess
+            
+    def game_over(self):
+        print('Would you like to play again?')
+        answers = ['y', 'n']
+        answer = input('y/n: ').lower()
+        
+        while answer not in answers:
+            print("Please enter y or n...")
+            answer = input('y/n: ').lower()
 
-            if guess in guesses:
-                print("You've already guessed {}. Please try again.".format(guess))
-                continue
+        while answer == 'y':
+            game = Game()
+            game.start()
+            print('Would you like to play again?')
+            answer = input('y/n: ').lower()
+            while answer not in answers:
+                print("Please enter y or n...")
+                answer = input('y/n: ').lower()
 
-            try:
-                correct = self.game_phrase.check_phrase(guess)
+        print("\nWE HOPE YOU ENJOYED PLAYING PHRASE HUNTER! PLEASE COME BACK AND CHECK FOR NEW PHRASES AND CHALLENGES! ")
 
-            except ValueError:
-                print("Guess must be a single character between a-z or A-Z.")
-                continue
 
-            guesses.append(guess)
+    def start(self):
+        self.welcome()
+        self.active_phrase.display(self.guesses)
 
-            if not correct:
-                incorrect.append(guess)
-                if len(incorrect) >= self.guess_limit:
-                    print("Oh, too bad! You've reached the guess limit!")
-                    compliance = input("Would you like to play again? [y]es/[n]o: ")
-
-                    if compliance.lower() == 'y':
-                        self.new_game()
-                        self.start_game()
-                        break
-
-                    else:
-                        break
-
-            if '_' not in self.game_phrase.show_phrase():
-                print("Congratulations! You solved the puzzle!")
-                compliance = input("Would you like try another phrase? [y]es or [n]o? ")
-
-                if compliance.lower() == 'y':
-                    self.new_game()
-                    self.start_game()
+        while self.missed != 5:
+            print("You have currently used {} guesses.\n".format(self.missed))
+            user_guess = self.get_guess()
+            self.guesses.append(user_guess)
+            if self.active_phrase.check_letter(user_guess):
+                print("CORRECT!\n")
+                self.active_phrase.display(self.guesses)
+                if self.active_phrase.check_complete(self.guesses):
+                    print("CONGRATULATIONS! YOU UNCOVERED THE PHRASE!\n")
                     break
+            if not self.active_phrase.check_letter(user_guess):
+                self.missed += 1
+                print("\nSORRY! THAT GUESS WAS INCORRECT. PLEASE TRY AGAIN.\n")
 
-                else:
-                    print("Thanks for playing")
-                    break
-
-            print("You have {} out of {} guesses remaining.".format(self.guess_limit - len(incorrect),
-                                                                    self.guess_limit))
+        if self.missed == 5:
+            print("Sorry, you've used up all your choices... ")
